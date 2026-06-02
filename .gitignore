@@ -1,0 +1,5 @@
+.env
+application-prod.yml
+target/
+*.iml
+.idea/
