@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/competitor_agent?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: ${MYSQL_PASSWORD:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  ai:
+    openai:
+      api-key: ${DEEPSEEK_API_KEY}
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-v4-flash
+          max-tokens: 4096
+          temperature: 0.7
+    retry:
+      max-attempts: 3
+      backoff:
+        initial-interval: 2s
+        multiplier: 2
+        max-interval: 30s
+
+jwt:
+  secret: ${JWT_SECRET:myDefaultSecretKeyForDevOnlyDoNotUseInProduction2024}
+  expiration: 86400000
+
+tavily:
+  api-key: ${TAVILY_API_KEY:}
+  base-url: https://api.tavily.com
+  timeout-seconds: 10
