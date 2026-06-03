@@ -1,0 +1,1934 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>竞品分析平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f5f5f5;
+        color: #333;
+      }
+
+      /* ===== 登录页 ===== */
+      #loginPage {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          #0c3483 0%,
+          #1a5ab8 40%,
+          #2d8cf0 100%
+        );
+        position: relative;
+        overflow: hidden;
+      }
+      #loginPage::before {
+        content: "";
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          circle,
+          rgba(45, 140, 240, 0.3),
+          transparent 70%
+        );
+        top: -200px;
+        right: -200px;
+        border-radius: 50%;
+      }
+      #loginPage::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(
+          circle,
+          rgba(12, 52, 131, 0.4),
+          transparent 70%
+        );
+        bottom: -100px;
+        left: -100px;
+        border-radius: 50%;
+      }
+      .login-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        width: 380px;
+        position: relative;
+        z-index: 1;
+      }
+      .login-box h1 {
+        text-align: center;
+        margin-bottom: 6px;
+        font-size: 24px;
+        color: #333;
+      }
+      .login-box p {
+        text-align: center;
+        color: #999;
+        margin-bottom: 28px;
+        font-size: 14px;
+      }
+      .login-box input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 14px;
+        transition: border-color 0.2s;
+      }
+      .login-box input:focus {
+        outline: none;
+        border-color: #2d8cf0;
+        box-shadow: 0 0 0 3px rgba(45, 140, 240, 0.15);
+      }
+      .login-box button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .login-box button:hover {
+        opacity: 0.9;
+      }
+      .login-box button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .login-error {
+        color: #e74c3c;
+        font-size: 13px;
+        text-align: center;
+        margin-top: 10px;
+        min-height: 20px;
+      }
+      .login-switch {
+        text-align: center;
+        margin-top: 14px;
+        font-size: 13px;
+        color: #999;
+      }
+      .login-switch a {
+        color: #2d8cf0;
+        cursor: pointer;
+      }
+      .login-switch a:hover {
+        text-decoration: underline;
+      }
+      .register-extra input {
+        margin-top: 0;
+      }
+
+      /* ===== 主界面 - 首页 ===== */
+      #mainPage {
+        display: none;
+        min-height: 100vh;
+      }
+      .header {
+        background: #fff;
+        padding: 14px 24px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .header h2 {
+        font-size: 18px;
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .header .user-info {
+        font-size: 13px;
+        color: #999;
+      }
+      .header button {
+        padding: 6px 16px;
+        background: #f0f0f0;
+        color: #666;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background 0.2s;
+      }
+      .header button:hover {
+        background: #e0e0e0;
+      }
+
+      /* 首页内容 */
+      .home-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      .hero {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .hero h1 {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .hero p {
+        color: #888;
+        font-size: 15px;
+      }
+
+      /* 搜索框 */
+      .search-box {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 32px;
+      }
+      .search-box input {
+        flex: 1;
+        padding: 14px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+      }
+      .search-box input:focus {
+        outline: none;
+        border-color: #2d8cf0;
+      }
+      .search-box button {
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: opacity 0.2s;
+      }
+      .search-box button:hover {
+        opacity: 0.9;
+      }
+      .search-box button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* 历史任务 */
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 14px;
+        color: #555;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .section-title a {
+        font-size: 13px;
+        color: #2d8cf0;
+        cursor: pointer;
+        font-weight: 400;
+      }
+
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .task-card {
+        background: #fff;
+        padding: 16px 18px;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .task-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+      .task-info h3 {
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .task-info .meta {
+        font-size: 12px;
+        color: #aaa;
+      }
+      .task-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .status-RUNNING {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .status-COMPLETED {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status-FAILED {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .status-PENDING {
+        background: #e2e3e5;
+        color: #383d41;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: #bbb;
+        padding: 40px;
+        font-size: 14px;
+      }
+
+      /* 分页 */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 20px;
+        padding: 12px 0;
+      }
+      .pagination button {
+        padding: 6px 16px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .pagination button:hover:not(:disabled) {
+        background: #2d8cf0;
+        color: #fff;
+        border-color: #2d8cf0;
+      }
+      .pagination button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .pagination span {
+        font-size: 13px;
+        color: #888;
+      }
+
+      /* 任务卡片操作 */
+      .task-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-delete {
+        padding: 4px 10px;
+        background: transparent;
+        color: #e74c3c;
+        border: 1px solid #f8d7da;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+      .btn-delete:hover {
+        background: #e74c3c;
+        color: #fff;
+      }
+
+      /* ===== 分析详情页 ===== */
+      #detailPage {
+        display: none;
+        min-height: 100vh;
+        background: #f5f5f5;
+      }
+      .detail-header {
+        background: #fff;
+        padding: 14px 24px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .back-btn {
+        padding: 6px 14px;
+        background: #f0f0f0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s;
+      }
+      .back-btn:hover {
+        background: #e0e0e0;
+      }
+      .detail-header h2 {
+        font-size: 17px;
+        flex: 1;
+      }
+      .detail-header .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
+
+      /* Agent 进度 */
+      .agent-progress {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+      .agent-progress h3 {
+        font-size: 15px;
+        margin-bottom: 18px;
+        color: #555;
+      }
+
+      .agent-step {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f5f5f5;
+      }
+      .agent-step:last-child {
+        border-bottom: none;
+      }
+      .agent-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .agent-icon.pending {
+        background: #f0f0f0;
+        color: #bbb;
+      }
+      .agent-icon.running {
+        background: #fff3cd;
+        color: #f0ad4e;
+        animation: pulse 1.5s infinite;
+      }
+      .agent-icon.done {
+        background: #d4edda;
+        color: #28a745;
+      }
+      .agent-icon.failed {
+        background: #f8d7da;
+        color: #dc3545;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      .agent-detail {
+        flex: 1;
+      }
+      .agent-detail .name {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .agent-detail .desc {
+        font-size: 12px;
+        color: #999;
+        margin-top: 2px;
+      }
+      .agent-detail .status-text {
+        font-size: 12px;
+        margin-top: 2px;
+      }
+      .agent-detail .status-text.running {
+        color: #f0ad4e;
+      }
+      .agent-detail .status-text.done {
+        color: #28a745;
+      }
+      .agent-detail .status-text.failed {
+        color: #dc3545;
+      }
+
+      /* 报告区域 */
+      .report-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 28px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: none;
+      }
+      .report-section h3 {
+        font-size: 16px;
+        margin-bottom: 16px;
+        color: #555;
+      }
+      .report-content {
+        line-height: 1.9;
+        color: #2c3e50;
+        font-size: 14.5px;
+      }
+      .report-content h1 {
+        font-size: 26px;
+        margin: 0 0 20px;
+        padding-bottom: 14px;
+        border-bottom: 3px solid #2d8cf0;
+        color: #0c3483;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, #0c3483, #1a5ab8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .report-content h2 {
+        font-size: 20px;
+        margin: 32px 0 16px;
+        padding: 8px 0 8px 16px;
+        border-left: 5px solid #2d8cf0;
+        color: #0c3483;
+        background: linear-gradient(90deg, #f0f7ff, transparent);
+        border-radius: 0 8px 8px 0;
+      }
+      .report-content h3 {
+        font-size: 17px;
+        margin: 24px 0 12px;
+        color: #1a5ab8;
+        padding-bottom: 4px;
+        border-bottom: 1px dashed #d0e3f7;
+      }
+      .report-content h4 {
+        font-size: 14.5px;
+        margin: 16px 0 8px;
+        color: #555;
+      }
+      .report-content p {
+        margin: 8px 0;
+        text-align: justify;
+      }
+      .report-content strong {
+        color: #1a1a2e;
+      }
+      .report-content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+        font-size: 13px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+      .report-content th,
+      .report-content td {
+        border: 1px solid #e8e8e8;
+        padding: 10px 14px;
+        text-align: left;
+      }
+      .report-content th {
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+      .report-content tr:nth-child(even) {
+        background: #f0f7ff;
+      }
+      .report-content tr:hover {
+        background: #dceafb;
+      }
+      .report-content ul,
+      .report-content ol {
+        padding-left: 24px;
+        margin: 10px 0;
+      }
+      .report-content li {
+        margin: 4px 0;
+      }
+      .report-content li::marker {
+        color: #2d8cf0;
+      }
+      .report-content blockquote {
+        border-left: 4px solid #2d8cf0;
+        padding: 12px 20px;
+        margin: 16px 0;
+        background: linear-gradient(90deg, #e8f4fd, #f0f7ff);
+        color: #555;
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+      .report-content hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #2d8cf0, transparent);
+        margin: 28px 0;
+      }
+      .report-content code {
+        background: #e8f4fd;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #1a5ab8;
+      }
+      .report-content pre {
+        background: #1e1e2e;
+        color: #cdd6f4;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 12px 0;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .report-content pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+      }
+      .report-content a {
+        color: #2d8cf0;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(45, 140, 240, 0.3);
+      }
+      .report-content a:hover {
+        border-bottom-color: #2d8cf0;
+      }
+
+      /* ===== 审核意见/JSON 格式化样式 ===== */
+      .review-score-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin: 16px 0;
+        padding: 16px;
+        background: linear-gradient(135deg, #f0f7ff, #e8f4fd);
+        border-radius: 10px;
+        border: 1px solid #d0e3f7;
+      }
+      .score-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+      .score-label {
+        font-size: 13px;
+        color: #555;
+      }
+      .score-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a5ab8;
+      }
+      .inline-score {
+        display: inline-block;
+        padding: 2px 10px;
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-left: 4px;
+      }
+
+      .issue-card {
+        background: #fff;
+        border: 1px solid #e0e8f0;
+        border-radius: 10px;
+        padding: 16px 18px;
+        margin: 10px 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: all 0.2s;
+      }
+      .issue-card:hover {
+        box-shadow: 0 3px 10px rgba(26, 90, 184, 0.1);
+        transform: translateY(-1px);
+      }
+      .issue-header {
+        margin-bottom: 8px;
+      }
+      .issue-num {
+        display: inline-block;
+        padding: 3px 12px;
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .issue-evidence {
+        background: #fffbeb;
+        border-left: 3px solid #f59e0b;
+        padding: 8px 12px;
+        margin: 8px 0 !important;
+        border-radius: 0 6px 6px 0;
+        font-size: 13px;
+        color: #92400e;
+      }
+      .priority-high {
+        display: inline-block;
+        padding: 2px 10px;
+        background: #fef2f2;
+        color: #dc2626;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid #fecaca;
+        margin-right: 6px;
+      }
+      .priority-mid {
+        display: inline-block;
+        padding: 2px 10px;
+        background: #fffbeb;
+        color: #d97706;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid #fde68a;
+        margin-right: 6px;
+      }
+      .priority-low {
+        display: inline-block;
+        padding: 2px 10px;
+        background: #f0fdf4;
+        color: #16a34a;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid #bbf7d0;
+        margin-right: 6px;
+      }
+
+      /* 错误信息 */
+      .error-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        display: none;
+      }
+      .error-section h3 {
+        color: #dc3545;
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+      .error-section p {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* ===== 报告搜索页 ===== */
+      #searchPage {
+        display: none;
+        min-height: 100vh;
+      }
+      .search-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
+      .search-input-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+      }
+      .search-input-bar input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 15px;
+      }
+      .search-input-bar input:focus {
+        outline: none;
+        border-color: #2d8cf0;
+      }
+      .search-input-bar button {
+        padding: 12px 24px;
+        background: #27ae60;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .search-input-bar button:hover {
+        background: #219a52;
+      }
+
+      .report-card {
+        background: #fff;
+        padding: 16px 18px;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+      }
+      .report-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .report-card h3 {
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .report-card .meta {
+        font-size: 12px;
+        color: #aaa;
+      }
+
+      /* ===== 用户管理页 ===== */
+      #userPage {
+        display: none;
+        min-height: 100vh;
+      }
+      .user-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 24px 20px;
+      }
+      .user-card {
+        background: #fff;
+        padding: 16px 18px;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .user-card h3 {
+        font-size: 15px;
+        margin-bottom: 2px;
+      }
+      .user-card .meta {
+        font-size: 12px;
+        color: #aaa;
+      }
+      .user-card .role {
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #e8f0fe;
+        color: #1a73e8;
+      }
+
+      /* ===== 弹窗 ===== */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 200;
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-overlay.show {
+        display: flex;
+      }
+      .modal {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        width: 400px;
+        max-width: 90vw;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      }
+      .modal h3 {
+        font-size: 16px;
+        margin-bottom: 16px;
+      }
+      .modal input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+      .modal input:focus {
+        outline: none;
+        border-color: #2d8cf0;
+      }
+      .modal-btns {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 8px;
+      }
+      .modal-btns button {
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        border: none;
+      }
+      .modal-btns .btn-cancel {
+        background: #f0f0f0;
+        color: #666;
+      }
+      .modal-btns .btn-cancel:hover {
+        background: #e0e0e0;
+      }
+      .modal-btns .btn-confirm {
+        background: linear-gradient(135deg, #1a5ab8, #2d8cf0);
+        color: #fff;
+      }
+      .modal-btns .btn-confirm:hover {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===== 登录页 ===== -->
+    <div id="loginPage">
+      <div class="login-box">
+        <h1 id="authTitle">竞品分析平台</h1>
+        <p id="authDesc">多 Agent 协作，一键生成竞品报告</p>
+        <input type="text" id="username" placeholder="用户名" value="admin" />
+        <input
+          type="password"
+          id="password"
+          placeholder="密码"
+          value="admin123"
+        />
+        <input
+          type="email"
+          id="email"
+          placeholder="邮箱（选填）"
+          class="register-extra"
+          style="display: none"
+        />
+        <button id="authBtn" onclick="handleAuth()">登录</button>
+        <div class="login-error" id="loginError"></div>
+        <div class="login-switch" id="authSwitch">
+          还没有账号？<a onclick="toggleAuthMode()">立即注册</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 首页 ===== -->
+    <div id="mainPage">
+      <div class="header">
+        <div class="header-left">
+          <h2>竞品分析平台</h2>
+          <span class="user-info" id="userInfo"></span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <button onclick="showUserPage()">用户管理</button>
+          <button onclick="showSearchPage()">搜索报告</button>
+          <button onclick="logout()">退出</button>
+        </div>
+      </div>
+      <div class="home-container">
+        <div class="hero">
+          <h1>输入公司名，开始分析</h1>
+          <p>四个 Agent 协作：采集 → 分析 → 报告 → 审核</p>
+        </div>
+        <div class="search-box">
+          <input
+            type="text"
+            id="companyInput"
+            placeholder="输入公司名称，如：字节跳动、阿里巴巴"
+            onkeydown="if (event.key === 'Enter') createTask();"
+            autofocus
+          />
+          <button id="createBtn" onclick="createTask()">开始分析</button>
+        </div>
+        <div class="section-title">
+          <span>历史分析</span>
+          <a onclick="loadTasks()">刷新</a>
+        </div>
+        <div class="task-list" id="taskList">
+          <div class="empty-state">加载中...</div>
+        </div>
+        <!-- 分页 -->
+        <div class="pagination" id="pagination" style="display: none">
+          <button id="prevBtn" onclick="changePage(-1)">上一页</button>
+          <span id="pageInfo">1 / 1</span>
+          <button id="nextBtn" onclick="changePage(1)">下一页</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 分析详情页 ===== -->
+    <div id="detailPage">
+      <div class="detail-header">
+        <button class="back-btn" onclick="goHome()">&larr; 返回</button>
+        <h2 id="detailTitle">分析中...</h2>
+        <span class="status-badge status-RUNNING" id="detailStatus"
+          >分析中</span
+        >
+      </div>
+      <div class="detail-container">
+        <!-- Agent 进度 -->
+        <div class="agent-progress" id="agentProgress">
+          <h3>分析进度</h3>
+          <div class="agent-step" id="step-collect">
+            <div class="agent-icon pending" id="icon-collect">1</div>
+            <div class="agent-detail">
+              <div class="name">采集 Agent</div>
+              <div class="desc">从公开渠道采集竞品信息</div>
+              <div class="status-text" id="status-collect">等待中</div>
+            </div>
+          </div>
+          <div class="agent-step" id="step-analyze">
+            <div class="agent-icon pending" id="icon-analyze">2</div>
+            <div class="agent-detail">
+              <div class="name">分析 Agent</div>
+              <div class="desc">提炼关键指标，对比竞品优劣势</div>
+              <div class="status-text" id="status-analyze">等待中</div>
+            </div>
+          </div>
+          <div class="agent-step" id="step-report">
+            <div class="agent-icon pending" id="icon-report">3</div>
+            <div class="agent-detail">
+              <div class="name">报告 Agent</div>
+              <div class="desc">生成结构化竞品分析报告</div>
+              <div class="status-text" id="status-report">等待中</div>
+            </div>
+          </div>
+          <div class="agent-step" id="step-review">
+            <div class="agent-icon pending" id="icon-review">4</div>
+            <div class="agent-detail">
+              <div class="name">审核 Agent</div>
+              <div class="desc">交叉校验，标注置信度</div>
+              <div class="status-text" id="status-review">等待中</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 报告 -->
+        <div class="report-section" id="reportSection">
+          <h3>分析报告</h3>
+          <div class="report-content" id="reportContent"></div>
+        </div>
+
+        <!-- 错误 -->
+        <div class="error-section" id="errorSection">
+          <h3>分析失败</h3>
+          <p id="errorMessage"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 报告搜索页 ===== -->
+    <div id="searchPage">
+      <div class="header">
+        <div class="header-left">
+          <h2>搜索报告</h2>
+        </div>
+        <button onclick="goHome()">&larr; 返回首页</button>
+      </div>
+      <div class="search-container">
+        <div class="search-input-bar">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="输入关键词搜索报告"
+            onkeydown="if (event.key === 'Enter') searchReports();"
+          />
+          <button onclick="searchReports()">搜索</button>
+        </div>
+        <div id="reportList">
+          <div class="empty-state">输入关键词搜索报告</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 用户管理页 ===== -->
+    <div id="userPage">
+      <div class="header">
+        <div class="header-left">
+          <h2>用户管理</h2>
+        </div>
+        <button onclick="goHome()">&larr; 返回首页</button>
+      </div>
+      <div class="user-container">
+        <div class="section-title">
+          <span>用户列表</span>
+          <a onclick="loadUsers()">刷新</a>
+        </div>
+        <div id="userList">
+          <div class="empty-state">加载中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 用户详情弹窗 ===== -->
+    <div class="modal-overlay" id="userModal">
+      <div class="modal">
+        <h3 id="userModalTitle">用户详情</h3>
+        <div id="userModalBody"></div>
+        <div class="modal-btns">
+          <button class="btn-cancel" onclick="closeUserModal()">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = "";
+      let token = localStorage.getItem("token");
+      let currentSse = null;
+      let currentTaskId = null;
+
+      // Agent 定义
+      const AGENTS = ["collect", "analyze", "report", "review"];
+      const AGENT_NAMES = {
+        collect: "采集",
+        analyze: "分析",
+        report: "报告",
+        review: "审核",
+      };
+
+      // 分页状态
+      let currentPage = 1;
+      let totalPages = 1;
+      const PAGE_SIZE = 10;
+
+      // 注册/登录模式
+      let isRegisterMode = false;
+
+      // ========== 页面切换 ==========
+
+      function showPage(pageId) {
+        [
+          "loginPage",
+          "mainPage",
+          "detailPage",
+          "searchPage",
+          "userPage",
+        ].forEach((id) => {
+          document.getElementById(id).style.display = "none";
+        });
+        document.getElementById(pageId).style.display =
+          pageId === "loginPage" ? "flex" : "block";
+      }
+
+      function goHome() {
+        if (currentSse) {
+          currentSse.close();
+          currentSse = null;
+        }
+        currentTaskId = null;
+        showPage("mainPage");
+        loadTasks();
+      }
+
+      function showSearchPage() {
+        showPage("searchPage");
+      }
+
+      function showUserPage() {
+        showPage("userPage");
+        loadUsers();
+      }
+
+      // ========== 注册/登录切换 ==========
+
+      function toggleAuthMode() {
+        isRegisterMode = !isRegisterMode;
+        document.getElementById("authTitle").textContent = isRegisterMode
+          ? "注册账号"
+          : "竞品分析平台";
+        document.getElementById("authDesc").textContent = isRegisterMode
+          ? "创建账号，开始使用"
+          : "多 Agent 协作，一键生成竞品报告";
+        document.getElementById("authBtn").textContent = isRegisterMode
+          ? "注册"
+          : "登录";
+        document.getElementById("email").style.display = isRegisterMode
+          ? "block"
+          : "none";
+        document.getElementById("authSwitch").innerHTML = isRegisterMode
+          ? '已有账号？<a onclick="toggleAuthMode()">返回登录</a>'
+          : '还没有账号？<a onclick="toggleAuthMode()">立即注册</a>';
+        document.getElementById("loginError").textContent = "";
+      }
+
+      function handleAuth() {
+        if (isRegisterMode) {
+          register();
+        } else {
+          login();
+        }
+      }
+
+      // ========== 登录 ==========
+
+      function login() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const errorEl = document.getElementById("loginError");
+        const btn = document.getElementById("authBtn");
+
+        if (!username || !password) {
+          errorEl.textContent = "请输入用户名和密码";
+          return;
+        }
+
+        btn.disabled = true;
+        errorEl.textContent = "";
+
+        fetch(API + "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify({ username, password }),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data && res.data.token) {
+              token = res.data.token;
+              localStorage.setItem("token", token);
+              document.getElementById("userInfo").textContent = username;
+              showPage("mainPage");
+              loadTasks();
+            } else {
+              errorEl.textContent = res.message || "登录失败";
+            }
+          })
+          .catch(() => {
+            errorEl.textContent = "网络错误，请检查后端是否启动";
+          })
+          .finally(() => {
+            btn.disabled = false;
+          });
+      }
+
+      // ========== 注册 ==========
+
+      function register() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const errorEl = document.getElementById("loginError");
+        const btn = document.getElementById("authBtn");
+
+        if (!username || !password) {
+          errorEl.textContent = "请输入用户名和密码";
+          return;
+        }
+        if (password.length < 6) {
+          errorEl.textContent = "密码至少6位";
+          return;
+        }
+
+        btn.disabled = true;
+        errorEl.textContent = "";
+
+        fetch(API + "/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json; charset=utf-8" },
+          body: JSON.stringify({
+            username,
+            password,
+            email: email || undefined,
+          }),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200) {
+              errorEl.style.color = "#28a745";
+              errorEl.textContent = "注册成功！请登录";
+              setTimeout(() => {
+                toggleAuthMode();
+                errorEl.style.color = "#e74c3c";
+              }, 1500);
+            } else {
+              errorEl.textContent = res.message || "注册失败";
+            }
+          })
+          .catch(() => {
+            errorEl.textContent = "网络错误";
+          })
+          .finally(() => {
+            btn.disabled = false;
+          });
+      }
+
+      function logout() {
+        token = null;
+        localStorage.removeItem("token");
+        if (currentSse) {
+          currentSse.close();
+          currentSse = null;
+        }
+        showPage("loginPage");
+      }
+
+      // ========== 工具 ==========
+
+      function authHeaders() {
+        return {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json; charset=utf-8",
+        };
+      }
+
+      function esc(str) {
+        const div = document.createElement("div");
+        div.textContent = str || "";
+        return div.innerHTML;
+      }
+
+      function formatTime(t) {
+        if (!t) return "";
+        return t.replace("T", " ").substring(0, 16);
+      }
+
+      function statusText(s) {
+        return (
+          {
+            PENDING: "等待中",
+            RUNNING: "分析中",
+            COMPLETED: "已完成",
+            FAILED: "失败",
+          }[s] || s
+        );
+      }
+
+      // ========== 首页 - 任务列表 ==========
+
+      function loadTasks(page) {
+        if (page) currentPage = page;
+        fetch(
+          API + "/api/tasks?pageNum=" + currentPage + "&pageSize=" + PAGE_SIZE,
+          {
+            headers: authHeaders(),
+          },
+        )
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200) {
+              totalPages = res.data.pages || 1;
+              renderTasks(res.data.records || []);
+              renderPagination();
+            } else if (res.code === 401) {
+              logout();
+            }
+          })
+          .catch(() => {
+            document.getElementById("taskList").innerHTML =
+              '<div class="empty-state">加载失败，请刷新</div>';
+          });
+      }
+
+      function renderPagination() {
+        const el = document.getElementById("pagination");
+        if (totalPages <= 1) {
+          el.style.display = "none";
+          return;
+        }
+        el.style.display = "flex";
+        document.getElementById("prevBtn").disabled = currentPage <= 1;
+        document.getElementById("nextBtn").disabled = currentPage >= totalPages;
+        document.getElementById("pageInfo").textContent =
+          currentPage + " / " + totalPages;
+      }
+
+      function changePage(delta) {
+        const newPage = currentPage + delta;
+        if (newPage >= 1 && newPage <= totalPages) {
+          loadTasks(newPage);
+        }
+      }
+
+      function renderTasks(tasks) {
+        const el = document.getElementById("taskList");
+        if (!tasks.length) {
+          el.innerHTML =
+            '<div class="empty-state">暂无分析记录，输入公司名开始第一次分析</div>';
+          return;
+        }
+        el.innerHTML = tasks
+          .map(
+            (t) => `
+        <div class="task-card" onclick="openTask(${t.id}, '${esc(t.companyName)}', '${t.status}')">
+            <div class="task-info">
+                <h3>${esc(t.companyName)}</h3>
+                <div class="meta">${formatTime(t.createdAt)} ${t.aiCallCount ? "| AI调用 " + t.aiCallCount + "次" : ""}</div>
+            </div>
+            <div class="task-actions">
+                <div class="task-status status-${t.status}">${statusText(t.status)}</div>
+                <button class="btn-delete" onclick="event.stopPropagation(); deleteTask(${t.id})">删除</button>
+            </div>
+        </div>
+    `,
+          )
+          .join("");
+      }
+
+      function deleteTask(taskId) {
+        if (!confirm("确定删除该分析任务？")) return;
+        fetch(API + "/api/tasks/" + taskId, {
+          method: "DELETE",
+          headers: authHeaders(),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200) {
+              loadTasks();
+            } else {
+              alert(res.message || "删除失败");
+            }
+          })
+          .catch(() => alert("网络错误"));
+      }
+
+      // ========== 创建任务 ==========
+
+      function createTask() {
+        const input = document.getElementById("companyInput");
+        const companyName = input.value.trim();
+        const btn = document.getElementById("createBtn");
+
+        if (!companyName) return;
+
+        btn.disabled = true;
+        fetch(API + "/api/tasks", {
+          method: "POST",
+          headers: authHeaders(),
+          body: JSON.stringify({ companyName }),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data) {
+              input.value = "";
+              // 跳转到分析详情页
+              openTask(res.data.id, companyName, "RUNNING");
+            } else {
+              alert(res.message || "创建失败");
+            }
+          })
+          .catch(() => alert("网络错误"))
+          .finally(() => {
+            btn.disabled = false;
+          });
+      }
+
+      // ========== 分析详情页 ==========
+
+      function openTask(taskId, companyName, status) {
+        currentTaskId = taskId;
+        showPage("detailPage");
+
+        document.getElementById("detailTitle").textContent =
+          companyName + " - 竞品分析";
+
+        // 重置 Agent 状态
+        AGENTS.forEach((a) => {
+          document.getElementById("icon-" + a).className = "agent-icon pending";
+          document.getElementById("icon-" + a).textContent =
+            AGENTS.indexOf(a) + 1;
+          document.getElementById("status-" + a).textContent = "等待中";
+          document.getElementById("status-" + a).className = "status-text";
+        });
+        document.getElementById("reportSection").style.display = "none";
+        document.getElementById("errorSection").style.display = "none";
+
+        if (status === "COMPLETED") {
+          // 已完成，直接加载报告
+          setDetailStatus("COMPLETED");
+          AGENTS.forEach((a) => markAgentDone(a));
+          loadReport(taskId);
+        } else if (status === "FAILED") {
+          setDetailStatus("FAILED");
+          loadTaskError(taskId);
+        } else {
+          // 运行中，连接 SSE
+          setDetailStatus("RUNNING");
+          connectSse(taskId);
+        }
+      }
+
+      function setDetailStatus(status) {
+        const badge = document.getElementById("detailStatus");
+        badge.className = "status-badge status-" + status;
+        badge.textContent = statusText(status);
+      }
+
+      function markAgentRunning(agent) {
+        const icon = document.getElementById("icon-" + agent);
+        const status = document.getElementById("status-" + agent);
+        if (icon) {
+          icon.className = "agent-icon running";
+          icon.textContent = "⟳";
+        }
+        if (status) {
+          status.textContent = "正在执行...";
+          status.className = "status-text running";
+        }
+      }
+
+      function markAgentDone(agent) {
+        const icon = document.getElementById("icon-" + agent);
+        const status = document.getElementById("status-" + agent);
+        if (icon) {
+          icon.className = "agent-icon done";
+          icon.textContent = "✓";
+        }
+        if (status) {
+          status.textContent = "已完成";
+          status.className = "status-text done";
+        }
+      }
+
+      function markAgentFailed(agent) {
+        const icon = document.getElementById("icon-" + agent);
+        const status = document.getElementById("status-" + agent);
+        if (icon) {
+          icon.className = "agent-icon failed";
+          icon.textContent = "✗";
+        }
+        if (status) {
+          status.textContent = "失败";
+          status.className = "status-text failed";
+        }
+      }
+
+      function cleanReportContent(raw) {
+        if (!raw) return "";
+        let text = raw;
+
+        // 1. 移除 ```json ... ``` 代码块
+        text = text.replace(/```json\s*[\s\S]*?```/gi, "");
+
+        // 2. 格式化裸露的 JSON 文本（审核意见等嵌套JSON）
+        // 匹配以 { 开头、以 } 结尾，且包含中文或特定 key 的长文本块
+        text = text.replace(
+          /\n(\s*\{[\s\S]{100,}\})\n/g,
+          function (match, jsonStr) {
+            try {
+              const obj = JSON.parse(jsonStr.trim());
+              return "\n\n" + formatJsonToHtml(obj) + "\n\n";
+            } catch (e) {
+              return match;
+            }
+          },
+        );
+
+        // 3. 移除 ``` 中残留的 JSON 代码块
+        text = text.replace(/```\s*[\s\S]*?```/g, function (match) {
+          if (
+            match.includes('"') &&
+            (match.includes("{") || match.includes("["))
+          ) {
+            return "";
+          }
+          return match;
+        });
+
+        // 4. 移除降级标记
+        text = text.replace(/---\s*⚠️[\s\S]*$/g, "");
+        text = text.replace(/---\s*Review Agent[\s\S]*$/gi, "");
+
+        // 5. 清理多余空行
+        text = text.replace(/\n{3,}/g, "\n\n");
+        return text.trim();
+      }
+
+      // 把 JSON 对象格式化为可读的 HTML
+      function formatJsonToHtml(obj, depth) {
+        if (depth === undefined) depth = 0;
+        let html = "";
+
+        if (Array.isArray(obj)) {
+          obj.forEach(function (item, i) {
+            html += formatJsonToHtml(item, depth);
+          });
+          return html;
+        }
+
+        if (typeof obj !== "object" || obj === null) {
+          return String(obj);
+        }
+
+        var keys = Object.keys(obj);
+
+        // 如果是评分类对象（数字值为主），用表格样式渲染
+        if (
+          keys.some(function (k) {
+            return typeof obj[k] === "number" && k.includes("分");
+          })
+        ) {
+          html += '<div class="review-score-grid">';
+          keys.forEach(function (k) {
+            var v = obj[k];
+            if (typeof v === "number") {
+              html +=
+                '<div class="score-item"><span class="score-label">' +
+                esc(k) +
+                '</span><span class="score-value">' +
+                v +
+                "</span></div>";
+            } else if (typeof v === "string" && v.length < 50) {
+              html +=
+                '<div class="score-item"><span class="score-label">' +
+                esc(k) +
+                '</span><span class="score-value">' +
+                esc(v) +
+                "</span></div>";
+            }
+          });
+          html += "</div>";
+          return html;
+        }
+
+        // 问题列表格式：数组中的对象
+        if (
+          keys.length <= 5 &&
+          (keys.includes("问题编号") ||
+            keys.includes("问题描述") ||
+            keys.includes("证据") ||
+            keys.includes("建议内容") ||
+            keys.includes("优先级"))
+        ) {
+          html += '<div class="issue-card">';
+          if (obj["问题编号"])
+            html +=
+              '<div class="issue-header"><span class="issue-num">问题 #' +
+              obj["问题编号"] +
+              "</span></div>";
+          if (obj["问题描述"])
+            html +=
+              "<p><strong>描述：</strong>" + esc(obj["问题描述"]) + "</p>";
+          if (obj["证据"])
+            html +=
+              '<p class="issue-evidence"><strong>证据：</strong>' +
+              esc(obj["证据"]) +
+              "</p>";
+          if (obj["优先级"])
+            html +=
+              '<span class="priority-' +
+              (obj["优先级"] === "高"
+                ? "high"
+                : obj["优先级"] === "中"
+                  ? "mid"
+                  : "low") +
+              '">' +
+              esc(obj["优先级"]) +
+              "优先级</span>";
+          if (obj["建议内容"])
+            html +=
+              "<p><strong>建议：</strong>" + esc(obj["建议内容"]) + "</p>";
+          html += "</div>";
+          return html;
+        }
+
+        // 通用键值对渲染
+        keys.forEach(function (key) {
+          var val = obj[key];
+          if (val === null || val === undefined) return;
+
+          if (typeof val === "string") {
+            if (val.length > 200) {
+              // 长文本当段落
+              html +=
+                "<p><strong>" + esc(key) + "：</strong>" + esc(val) + "</p>";
+            } else if (val.indexOf("{") >= 0 || val.indexOf("[") >= 0) {
+              try {
+                var nested = JSON.parse(val);
+                html += formatJsonToHtml(nested, depth + 1);
+              } catch (e) {
+                html +=
+                  "<p><strong>" + esc(key) + "：</strong>" + esc(val) + "</p>";
+              }
+            } else {
+              html +=
+                "<p><strong>" + esc(key) + "：</strong>" + esc(val) + "</p>";
+            }
+          } else if (typeof val === "number") {
+            html +=
+              "<p><strong>" +
+              esc(key) +
+              "：</strong><span class='inline-score'>" +
+              val +
+              "</span></p>";
+          } else if (Array.isArray(val)) {
+            html += "<p><strong>" + esc(key) + "：</strong></p>";
+            html += formatJsonToHtml(val, depth + 1);
+          } else if (typeof val === "object") {
+            html += "<p><strong>" + esc(key) + "：</strong></p>";
+            html += formatJsonToHtml(val, depth + 1);
+          }
+        });
+
+        return html;
+      }
+
+      function loadReport(taskId) {
+        fetch(API + "/api/tasks/" + taskId, { headers: authHeaders() })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data.result) {
+              const cleaned = cleanReportContent(res.data.result);
+              document.getElementById("reportContent").innerHTML =
+                marked.parse(cleaned);
+              document.getElementById("reportSection").style.display = "block";
+            }
+          });
+      }
+
+      function loadTaskError(taskId) {
+        fetch(API + "/api/tasks/" + taskId, { headers: authHeaders() })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data.result) {
+              document.getElementById("errorMessage").textContent =
+                res.data.result;
+              document.getElementById("errorSection").style.display = "block";
+            }
+          });
+      }
+
+      // ========== SSE ==========
+
+      function connectSse(taskId) {
+        if (currentSse) {
+          currentSse.close();
+        }
+
+        const url = API + "/api/tasks/" + taskId + "/stream?token=" + token;
+        currentSse = new EventSource(url);
+
+        currentSse.addEventListener("agent", function (e) {
+          const data = JSON.parse(e.data);
+          const agent = data.agent;
+          if (data.status === "RUNNING") {
+            markAgentRunning(agent);
+          } else if (data.status === "COMPLETED") {
+            markAgentDone(agent);
+          } else {
+            markAgentFailed(agent);
+          }
+        });
+
+        currentSse.addEventListener("result", function (e) {
+          const data = JSON.parse(e.data);
+          currentSse.close();
+          currentSse = null;
+
+          if (data.status === "COMPLETED") {
+            setDetailStatus("COMPLETED");
+            loadReport(taskId);
+          } else {
+            setDetailStatus("FAILED");
+            loadTaskError(taskId);
+          }
+        });
+
+        currentSse.onerror = function () {
+          currentSse.close();
+          currentSse = null;
+          // SSE 断开，可能是完成或超时，延迟查一下状态
+          setTimeout(() => {
+            fetch(API + "/api/tasks/" + taskId, { headers: authHeaders() })
+              .then((r) => r.json())
+              .then((res) => {
+                if (res.code === 200) {
+                  if (res.data.status === "COMPLETED") {
+                    setDetailStatus("COMPLETED");
+                    AGENTS.forEach((a) => markAgentDone(a));
+                    loadReport(taskId);
+                  } else if (res.data.status === "FAILED") {
+                    setDetailStatus("FAILED");
+                    loadTaskError(taskId);
+                  }
+                }
+              });
+          }, 2000);
+        };
+      }
+
+      // ========== 报告搜索 ==========
+
+      function searchReports() {
+        const keyword = document.getElementById("searchInput").value.trim();
+        if (!keyword) return;
+
+        fetch(
+          API +
+            "/api/reports/search?keyword=" +
+            encodeURIComponent(keyword) +
+            "&pageNum=1&pageSize=20",
+          {
+            headers: authHeaders(),
+          },
+        )
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200) {
+              renderReports(res.data.records || []);
+            }
+          });
+      }
+
+      function renderReports(reports) {
+        const el = document.getElementById("reportList");
+        if (!reports.length) {
+          el.innerHTML = '<div class="empty-state">未找到匹配的报告</div>';
+          return;
+        }
+        el.innerHTML = reports
+          .map(
+            (r) => `
+        <div class="report-card" onclick="viewReport(${r.id}, '${esc(r.companyName)}')">
+            <h3>${esc(r.companyName)}</h3>
+            <div class="meta">${formatTime(r.createdAt)}</div>
+        </div>
+    `,
+          )
+          .join("");
+      }
+
+      function viewReport(id, companyName) {
+        fetch(API + "/api/reports/" + id, { headers: authHeaders() })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data.content) {
+              // 跳到详情页展示报告
+              currentTaskId = null;
+              showPage("detailPage");
+              document.getElementById("detailTitle").textContent =
+                companyName + " - 竞品分析报告";
+              setDetailStatus("COMPLETED");
+              AGENTS.forEach((a) => markAgentDone(a));
+              const cleaned = cleanReportContent(res.data.content);
+              document.getElementById("reportContent").innerHTML =
+                marked.parse(cleaned);
+              document.getElementById("reportSection").style.display = "block";
+              document.getElementById("errorSection").style.display = "none";
+            }
+          });
+      }
+
+      // ========== 用户管理 ==========
+
+      function loadUsers() {
+        fetch(API + "/api/users", { headers: authHeaders() })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200) {
+              renderUsers(res.data || []);
+            } else if (res.code === 401) {
+              logout();
+            }
+          })
+          .catch(() => {
+            document.getElementById("userList").innerHTML =
+              '<div class="empty-state">加载失败</div>';
+          });
+      }
+
+      function renderUsers(users) {
+        const el = document.getElementById("userList");
+        if (!users || !users.length) {
+          el.innerHTML = '<div class="empty-state">暂无用户</div>';
+          return;
+        }
+        el.innerHTML = users
+          .map(
+            (u) => `
+          <div class="user-card" onclick="viewUser(${u.id})">
+            <div>
+              <h3>${esc(u.username)}</h3>
+              <div class="meta">${esc(u.email || "未设置邮箱")} | ${formatTime(u.createdAt)}</div>
+            </div>
+            <div class="role">${esc(u.role || "USER")}</div>
+          </div>
+        `,
+          )
+          .join("");
+      }
+
+      function viewUser(id) {
+        fetch(API + "/api/users/" + id, { headers: authHeaders() })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.code === 200 && res.data) {
+              const u = res.data;
+              document.getElementById("userModalTitle").textContent =
+                u.username + " - 用户详情";
+              document.getElementById("userModalBody").innerHTML = `
+                <div style="line-height:2; font-size:14px;">
+                  <div><strong>ID：</strong>${u.id}</div>
+                  <div><strong>用户名：</strong>${esc(u.username)}</div>
+                  <div><strong>邮箱：</strong>${esc(u.email || "未设置")}</div>
+                  <div><strong>角色：</strong>${esc(u.role || "USER")}</div>
+                  <div><strong>注册时间：</strong>${formatTime(u.createdAt)}</div>
+                  <div><strong>更新时间：</strong>${formatTime(u.updatedAt)}</div>
+                </div>
+              `;
+              document.getElementById("userModal").classList.add("show");
+            }
+          });
+      }
+
+      function closeUserModal() {
+        document.getElementById("userModal").classList.remove("show");
+      }
+
+      // ========== 初始化 ==========
+
+      if (token) {
+        document.getElementById("userInfo").textContent = "admin";
+        showPage("mainPage");
+        loadTasks();
+      }
+    </script>
+  </body>
+</html>
