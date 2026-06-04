@@ -21,7 +21,7 @@ spring:
         max-interval: 30s
 
 jwt:
-  secret: ${JWT_SECRET:myDefaultSecretKeyForDevOnlyDoNotUseInProduction2024}
+  secret: ${JWT_SECRET:dev-local-jwt-key-competitor-agent}
   expiration: 86400000
 
 tavily:
