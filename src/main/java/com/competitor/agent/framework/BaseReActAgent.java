@@ -7,6 +7,7 @@ import org.springframework.ai.chat.client.ChatClient;
 
 import com.competitor.agent.entity.AgentExecution;
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.PromptService;
 import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
@@ -28,14 +29,17 @@ public abstract class BaseReActAgent implements Agent {
     protected final ReadReportTool readReportTool;
     protected final AgentExecutionMapper agentExecutionMapper;
     protected final SseEmitterService sseEmitterService;
+    protected final PromptService promptService;
 
     protected BaseReActAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
-                             AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
+                             AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService,
+                             PromptService promptService) {
         this.chatClient = chatClient;
         this.searchTools = searchTools;
         this.readReportTool = readReportTool;
         this.agentExecutionMapper = agentExecutionMapper;
         this.sseEmitterService = sseEmitterService;
+        this.promptService = promptService;
     }
 
     @Override
@@ -106,7 +110,10 @@ public abstract class BaseReActAgent implements Agent {
         return fallback;
     }
 
-    protected abstract String getSystemPrompt();
+    /** 从PromptService读取System Prompt（数据库配置，支持热更新） */
+    protected String getSystemPrompt() {
+        return promptService.getSystemPrompt(getName());
+    }
     protected abstract String buildQuestion(AgentContext context);
     protected abstract String getResultKey();
 
