@@ -4,6 +4,7 @@ import java.util.Map;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.openai.OpenAiChatOptions;
 
 import com.competitor.agent.entity.AgentExecution;
 import com.competitor.agent.mapper.AgentExecutionMapper;
@@ -47,7 +48,7 @@ public abstract class BaseReActAgent implements Agent {
     public AgentResult execute(AgentContext context) {
         String companyName = context.getCompanyName();
         Long taskId = context.getTaskId();
-        log.info("[Agent开始] agent={} taskId={} company={}", getName(), taskId, companyName);
+        log.info("[Agent开始] agent={} taskId={} company={} model={}", getName(), taskId, companyName, getModelName());
         long start = System.currentTimeMillis();
 
         AgentExecution execution = new AgentExecution();
@@ -61,11 +62,20 @@ public abstract class BaseReActAgent implements Agent {
             // 流式调用：逐token推SSE，同时收集完整结果
             StringBuilder resultBuilder = new StringBuilder();
 
-            chatClient.prompt()
+            var promptSpec = chatClient.prompt()
                     .system(getSystemPrompt())
                     .user(question)
-                    .tools(searchTools, readReportTool)
-                    .stream()
+                    .tools(searchTools, readReportTool);
+
+            // 指定模型：覆盖默认模型配置
+            String modelName = getModelName();
+            if (modelName != null && !modelName.isBlank()) {
+                promptSpec = promptSpec.options(OpenAiChatOptions.builder()
+                        .model(modelName)
+                        .build());
+            }
+
+            promptSpec.stream()
                     .content()
                     .doOnNext(token -> {
                         resultBuilder.append(token);
@@ -114,6 +124,12 @@ public abstract class BaseReActAgent implements Agent {
     protected String getSystemPrompt() {
         return promptService.getSystemPrompt(getName());
     }
+
+    /** 返回Agent使用的模型名，null表示使用默认模型 */
+    protected String getModelName() {
+        return null;
+    }
+
     protected abstract String buildQuestion(AgentContext context);
     protected abstract String getResultKey();
 

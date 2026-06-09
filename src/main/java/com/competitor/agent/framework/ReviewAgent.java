@@ -21,6 +21,7 @@ public class ReviewAgent extends BaseReActAgent {
     @Override public String getName() { return "review"; }
     @Override public String getDescription() { return "review - 审核Agent：交叉校验报告，标注置信度"; }
     @Override protected String getResultKey() { return "reviewResult"; }
+    @Override protected String getModelName() { return "deepseek-chat"; }
 
     @Override
     protected String buildQuestion(AgentContext context) {

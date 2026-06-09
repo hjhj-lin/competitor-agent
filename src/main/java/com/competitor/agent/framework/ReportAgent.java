@@ -21,6 +21,7 @@ public class ReportAgent extends BaseReActAgent {
     @Override public String getName() { return "report"; }
     @Override public String getDescription() { return "report - 报告Agent：生成结构化竞品分析报告"; }
     @Override protected String getResultKey() { return "reportResult"; }
+    @Override protected String getModelName() { return "deepseek-chat"; }
 
     @Override
     protected String buildQuestion(AgentContext context) {
