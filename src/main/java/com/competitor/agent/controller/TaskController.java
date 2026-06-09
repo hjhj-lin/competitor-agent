@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.competitor.agent.annotation.RateLimit;
 import com.competitor.agent.common.Result;
 import com.competitor.agent.dto.CreateTaskRequest;
 import com.competitor.agent.service.AnalysisTaskService;
@@ -33,6 +34,7 @@ public class TaskController {
     private final SseEmitterService sseEmitterService;
 
     @PostMapping
+    @RateLimit(permits = 5, message = "创建任务过于频繁，每分钟最多5次")
     public Result<AnalysisTaskVO> createTask(
             @RequestAttribute("currentUserId") Long userId,
             @Valid @RequestBody CreateTaskRequest request) {

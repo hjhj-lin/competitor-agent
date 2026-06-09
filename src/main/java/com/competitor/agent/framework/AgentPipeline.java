@@ -97,15 +97,28 @@ public class AgentPipeline {
                     return result;
                 }
                 if (i < step.getMaxRetries()) {
-                    log.warn("[Agent重试] agent={} retry={}/{} error={}",
-                            step.getAgent().getName(), i + 1, step.getMaxRetries(), result.getError());
+                    long backoffMs = (1L << i) * 1000; // 指数退避: 1s, 2s, 4s...
+                    log.warn("[Agent重试] agent={} retry={}/{} backoff={}ms error={}",
+                            step.getAgent().getName(), i + 1, step.getMaxRetries(), backoffMs, result.getError());
+                    Thread.sleep(backoffMs);
                 }
                 lastException = new RuntimeException(result.getError());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.warn("[Agent重试中断] agent={}", step.getAgent().getName());
+                return AgentResult.fail("重试被中断: " + e.getMessage());
             } catch (Exception e) {
                 lastException = e;
                 if (i < step.getMaxRetries()) {
-                    log.warn("[Agent重试] agent={} retry={}/{} exception={}",
-                            step.getAgent().getName(), i + 1, step.getMaxRetries(), e.getMessage());
+                    long backoffMs = (1L << i) * 1000;
+                    log.warn("[Agent重试] agent={} retry={}/{} backoff={}ms exception={}",
+                            step.getAgent().getName(), i + 1, step.getMaxRetries(), backoffMs, e.getMessage());
+                    try {
+                        Thread.sleep(backoffMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return AgentResult.fail("重试被中断");
+                    }
                 }
             }
         }
