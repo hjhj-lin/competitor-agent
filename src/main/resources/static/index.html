@@ -533,7 +533,6 @@
         line-height: 1.8;
         color: #2c3e50;
         font-size: 14px;
-        white-space: pre-wrap;
         word-break: break-word;
         max-height: 400px;
         overflow-y: auto;
@@ -1102,7 +1101,10 @@
           style="display: none"
         >
           <h3 id="streamingTitle">AI 正在生成...</h3>
-          <div class="streaming-content" id="streamingContent"></div>
+          <div
+            class="streaming-content report-content"
+            id="streamingContent"
+          ></div>
         </div>
 
         <!-- 报告 -->
@@ -1816,9 +1818,10 @@
       function appendStreamingToken(agent, token) {
         streamingText += token;
         const content = document.getElementById("streamingContent");
-        // 用textContent防XSS，加闪烁光标
-        content.textContent = streamingText;
-        content.innerHTML += '<span class="streaming-cursor"></span>';
+        // 用marked.parse()实时渲染Markdown，加闪烁光标
+        content.innerHTML =
+          marked.parse(streamingText) +
+          '<span class="streaming-cursor"></span>';
         // 自动滚到底部
         content.scrollTop = content.scrollHeight;
       }
