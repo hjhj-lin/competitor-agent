@@ -21,3 +21,21 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+    instances:
+      tavily:
+        base-config: default
+      aiCall:
+        base-config: default
+        sliding-window-size: 6
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 60s

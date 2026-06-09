@@ -1,5 +1,6 @@
 package com.competitor.agent.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,11 +31,20 @@ public class TavilyService {
 
     private static final String DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 
+    @CircuitBreaker(name = "tavily", fallbackMethod = "searchFallback")
     public String search(String query) {
         if (tavilyApiKey != null && !tavilyApiKey.isBlank()) {
             return searchWithTavily(query);
         }
         log.info("[Tavily未配置，使用DeepSeek搜索] query={}", query);
+        return searchWithDeepSeek(query);
+    }
+
+    /**
+     * 熔断降级：Tavily连续失败后，直接走DeepSeek搜索
+     */
+    private String searchFallback(String query, Exception e) {
+        log.warn("[熔断降级] Tavily熔断，使用DeepSeek搜索 error={}", e.getMessage());
         return searchWithDeepSeek(query);
     }
 
@@ -67,12 +77,13 @@ public class TavilyService {
                 log.info("[Tavily成功] duration={}ms resultLength={}", duration, result.length());
                 return result;
             } else {
-                log.warn("[Tavily失败] statusCode={} duration={}ms, 降级到DeepSeek搜索", response.statusCode());
-                return searchWithDeepSeek(query);
+                log.warn("[Tavily失败] statusCode={} duration={}ms", response.statusCode(), duration);
+                throw new RuntimeException("Tavily API返回" + response.statusCode());
             }
+        } catch (RuntimeException e) {
+            throw e; // 让RuntimeException向上传播给熔断器
         } catch (Exception e) {
-            log.warn("[Tavily超时/异常] error={}，降级到DeepSeek搜索", e.getMessage());
-            return searchWithDeepSeek(query);
+            throw new RuntimeException("Tavily搜索异常: " + e.getMessage(), e);
         }
     }
 

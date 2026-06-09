@@ -2,6 +2,7 @@ package com.competitor.agent.framework;
 
 import java.util.Map;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.ai.chat.client.ChatClient;
 
 import com.competitor.agent.entity.AgentExecution;
@@ -38,6 +39,7 @@ public abstract class BaseReActAgent implements Agent {
     }
 
     @Override
+    @CircuitBreaker(name = "aiCall", fallbackMethod = "executeFallback")
     public AgentResult execute(AgentContext context) {
         String companyName = context.getCompanyName();
         Long taskId = context.getTaskId();
@@ -107,4 +109,10 @@ public abstract class BaseReActAgent implements Agent {
     protected abstract String getSystemPrompt();
     protected abstract String buildQuestion(AgentContext context);
     protected abstract String getResultKey();
+
+    /** AI调用熔断降级：直接返回失败结果 */
+    private AgentResult executeFallback(AgentContext context, Exception e) {
+        log.warn("[AI熔断降级] agent={} taskId={} error={}", getName(), context.getTaskId(), e.getMessage());
+        return AgentResult.fail("AI服务暂不可用: " + e.getMessage());
+    }
 }
