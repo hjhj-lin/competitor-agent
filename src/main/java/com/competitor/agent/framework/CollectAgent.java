@@ -4,6 +4,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
 
@@ -18,8 +19,9 @@ public class CollectAgent extends BaseReActAgent {
             "搜索时加上年份（如\"比亚迪 2026年 销量\"），获取最新数据。\n" +
             "当信息足够时，直接输出完整的采集结果，并标注数据来源。";
 
-    public CollectAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool, AgentExecutionMapper agentExecutionMapper) {
-        super(chatClient, searchTools, readReportTool, agentExecutionMapper);
+    public CollectAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+                        AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
+        super(chatClient, searchTools, readReportTool, agentExecutionMapper, sseEmitterService);
     }
 
     @Override public String getName() { return "collect"; }

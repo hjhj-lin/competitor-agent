@@ -6,6 +6,7 @@ import org.springframework.ai.chat.client.ChatClient;
 
 import com.competitor.agent.entity.AgentExecution;
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
 
@@ -25,38 +26,52 @@ public abstract class BaseReActAgent implements Agent {
     protected final SearchTools searchTools;
     protected final ReadReportTool readReportTool;
     protected final AgentExecutionMapper agentExecutionMapper;
+    protected final SseEmitterService sseEmitterService;
 
-    protected BaseReActAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool, AgentExecutionMapper agentExecutionMapper) {
+    protected BaseReActAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+                             AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
         this.chatClient = chatClient;
         this.searchTools = searchTools;
         this.readReportTool = readReportTool;
         this.agentExecutionMapper = agentExecutionMapper;
+        this.sseEmitterService = sseEmitterService;
     }
 
     @Override
     public AgentResult execute(AgentContext context) {
         String companyName = context.getCompanyName();
-        log.info("[Agent开始] agent={} taskId={} company={}", getName(), context.getTaskId(), companyName);
+        Long taskId = context.getTaskId();
+        log.info("[Agent开始] agent={} taskId={} company={}", getName(), taskId, companyName);
         long start = System.currentTimeMillis();
 
         AgentExecution execution = new AgentExecution();
-        execution.setTaskId(context.getTaskId());
+        execution.setTaskId(taskId);
         execution.setAgentName(getName());
 
         try {
             String question = buildQuestion(context);
             execution.setInputData(question);
 
-            // Spring AI Tool Calling: 注册搜索工具+历史报告工具
-            String result = chatClient.prompt()
+            // 流式调用：逐token推SSE，同时收集完整结果
+            StringBuilder resultBuilder = new StringBuilder();
+
+            chatClient.prompt()
                     .system(getSystemPrompt())
                     .user(question)
                     .tools(searchTools, readReportTool)
-                    .call()
-                    .content();
+                    .stream()
+                    .content()
+                    .doOnNext(token -> {
+                        resultBuilder.append(token);
+                        // 逐token推SSE给前端
+                        sseEmitterService.sendEvent(taskId, "content",
+                                Map.of("agent", getName(), "token", token));
+                    })
+                    .blockLast(); // 阻塞等待流结束
 
+            String result = resultBuilder.toString();
             long duration = System.currentTimeMillis() - start;
-            log.info("[Agent结束] agent={} taskId={} success=true duration={}ms", getName(), context.getTaskId(), duration);
+            log.info("[Agent结束] agent={} taskId={} success=true duration={}ms", getName(), taskId, duration);
 
             execution.setStatus("COMPLETED");
             execution.setOutputData(result);
@@ -66,7 +81,7 @@ public abstract class BaseReActAgent implements Agent {
             return AgentResult.success(Map.of("companyName", companyName, getResultKey(), result));
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - start;
-            log.error("[Agent失败] agent={} taskId={} duration={}ms error={}", getName(), context.getTaskId(), duration, e.getMessage());
+            log.error("[Agent失败] agent={} taskId={} duration={}ms error={}", getName(), taskId, duration, e.getMessage());
 
             execution.setStatus("FAILED");
             execution.setErrorMessage(e.getMessage());

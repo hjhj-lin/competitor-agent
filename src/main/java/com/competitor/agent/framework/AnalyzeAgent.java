@@ -4,6 +4,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
 
@@ -18,8 +19,9 @@ public class AnalyzeAgent extends BaseReActAgent {
             "所有数据必须来自搜索结果，不要使用训练数据编造。\n" +
             "当分析足够深入时，直接输出完整的分析结论。";
 
-    public AnalyzeAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool, AgentExecutionMapper agentExecutionMapper) {
-        super(chatClient, searchTools, readReportTool, agentExecutionMapper);
+    public AnalyzeAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+                        AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
+        super(chatClient, searchTools, readReportTool, agentExecutionMapper, sseEmitterService);
     }
 
     @Override public String getName() { return "analyze"; }

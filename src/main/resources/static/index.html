@@ -517,6 +517,49 @@
         color: #2c3e50;
         font-size: 14.5px;
       }
+      .streaming-section {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 1px solid #e3e8ef;
+      }
+      .streaming-section h3 {
+        color: #2d8cf0;
+        font-size: 16px;
+        margin: 0 0 12px;
+      }
+      .streaming-content {
+        line-height: 1.8;
+        color: #2c3e50;
+        font-size: 14px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 12px;
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #e3e8ef;
+      }
+      .streaming-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background: #2d8cf0;
+        animation: blink 0.8s infinite;
+        vertical-align: text-bottom;
+        margin-left: 2px;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
       .report-content h1 {
         font-size: 26px;
         margin: 0 0 20px;
@@ -1050,6 +1093,16 @@
               <div class="status-text" id="status-review">等待中</div>
             </div>
           </div>
+        </div>
+
+        <!-- 流式输出：AI正在思考/生成的内容 -->
+        <div
+          class="streaming-section"
+          id="streamingSection"
+          style="display: none"
+        >
+          <h3 id="streamingTitle">AI 正在生成...</h3>
+          <div class="streaming-content" id="streamingContent"></div>
         </div>
 
         <!-- 报告 -->
@@ -1719,6 +1772,8 @@
               document.getElementById("reportContent").innerHTML =
                 marked.parse(cleaned);
               document.getElementById("reportSection").style.display = "block";
+              // 报告加载完成后隐藏流式内容区
+              hideStreamingContent();
             }
           });
       }
@@ -1737,6 +1792,44 @@
 
       // ========== SSE ==========
 
+      // ========== 流式Token输出 ==========
+
+      const AGENT_LABELS = {
+        collect: "采集",
+        analyze: "分析",
+        report: "报告",
+        review: "审核",
+      };
+      let streamingText = "";
+
+      function showStreamingContent(agent) {
+        streamingText = "";
+        const section = document.getElementById("streamingSection");
+        const title = document.getElementById("streamingTitle");
+        const content = document.getElementById("streamingContent");
+        section.style.display = "block";
+        title.textContent =
+          (AGENT_LABELS[agent] || agent) + " Agent 正在生成...";
+        content.innerHTML = '<span class="streaming-cursor"></span>';
+      }
+
+      function appendStreamingToken(agent, token) {
+        streamingText += token;
+        const content = document.getElementById("streamingContent");
+        // 用textContent防XSS，加闪烁光标
+        content.textContent = streamingText;
+        content.innerHTML += '<span class="streaming-cursor"></span>';
+        // 自动滚到底部
+        content.scrollTop = content.scrollHeight;
+      }
+
+      function hideStreamingContent() {
+        document.getElementById("streamingSection").style.display = "none";
+        streamingText = "";
+      }
+
+      // ========== SSE连接 ==========
+
       function connectSse(taskId) {
         if (currentSse) {
           currentSse.close();
@@ -1750,11 +1843,19 @@
           const agent = data.agent;
           if (data.status === "RUNNING") {
             markAgentRunning(agent);
+            // 新Agent开始时，清空流式内容区，显示当前Agent名
+            showStreamingContent(agent);
           } else if (data.status === "COMPLETED") {
             markAgentDone(agent);
           } else {
             markAgentFailed(agent);
           }
+        });
+
+        // 流式Token输出：逐token追加显示
+        currentSse.addEventListener("content", function (e) {
+          const data = JSON.parse(e.data);
+          appendStreamingToken(data.agent, data.token);
         });
 
         currentSse.addEventListener("result", function (e) {

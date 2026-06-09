@@ -4,6 +4,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
 
@@ -25,8 +26,9 @@ public class ReviewAgent extends BaseReActAgent {
             "   - 发现的问题列表\n" +
             "   - 修正建议";
 
-    public ReviewAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool, AgentExecutionMapper agentExecutionMapper) {
-        super(chatClient, searchTools, readReportTool, agentExecutionMapper);
+    public ReviewAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+                       AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
+        super(chatClient, searchTools, readReportTool, agentExecutionMapper, sseEmitterService);
     }
 
     @Override public String getName() { return "review"; }

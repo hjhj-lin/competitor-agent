@@ -4,6 +4,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Component;
 
 import com.competitor.agent.mapper.AgentExecutionMapper;
+import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.tool.ReadReportTool;
 import com.competitor.agent.tool.SearchTools;
 
@@ -23,8 +24,9 @@ public class ReportAgent extends BaseReActAgent {
             "报告必须完整输出，不要截断，不要省略。\n" +
             "所有数据必须来自搜索结果，不要使用训练数据编造。";
 
-    public ReportAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool, AgentExecutionMapper agentExecutionMapper) {
-        super(chatClient, searchTools, readReportTool, agentExecutionMapper);
+    public ReportAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+                       AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService) {
+        super(chatClient, searchTools, readReportTool, agentExecutionMapper, sseEmitterService);
     }
 
     @Override public String getName() { return "report"; }
