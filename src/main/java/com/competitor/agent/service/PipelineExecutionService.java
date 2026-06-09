@@ -12,6 +12,7 @@ import com.competitor.agent.framework.AgentResult;
 import com.competitor.agent.framework.PipelineResult;
 import com.competitor.agent.mapper.AnalysisTaskMapper;
 import com.competitor.agent.mapper.ReportMapper;
+import com.competitor.agent.tool.ReadReportTool;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,9 @@ public class PipelineExecutionService {
         }
 
         AgentContext context = AgentContext.of(taskId, companyName);
+
+        // 设置当前用户ID到ThreadLocal，供ReadReportTool使用
+        ReadReportTool.setUserId(userId);
 
         try {
             PipelineResult pipelineResult = agentPipeline.execute(context);
@@ -79,6 +83,9 @@ public class PipelineExecutionService {
             log.error("[Pipeline执行异常] taskId={} error={}", taskId, e.getMessage());
             task.setStatus(TaskStatus.FAILED.getCode());
             task.setResult("Pipeline执行异常: " + e.getMessage());
+        } finally {
+            // 清理ThreadLocal，防止内存泄漏
+            ReadReportTool.clearUserId();
         }
 
         analysisTaskMapper.updateById(task);
