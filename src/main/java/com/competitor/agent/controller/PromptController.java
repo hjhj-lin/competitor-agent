@@ -14,11 +14,11 @@ import com.competitor.agent.common.Result;
 import com.competitor.agent.entity.PromptTemplate;
 import com.competitor.agent.service.PromptService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-/**
- * Prompt模板管理API - 支持查看和热更新
- */
+@Tag(name = "Prompt管理", description = "Prompt模板查看与热更新")
 @RestController
 @RequestMapping("/api/prompts")
 @RequiredArgsConstructor
@@ -26,19 +26,19 @@ public class PromptController {
 
     private final PromptService promptService;
 
-    /** 获取所有Prompt模板列表 */
+    @Operation(summary = "获取所有Prompt模板")
     @GetMapping
     public Result<List<PromptTemplate>> listPrompts() {
         return Result.success(promptService.listAll());
     }
 
-    /** 获取指定Agent的Prompt模板 */
+    @Operation(summary = "获取指定Agent的Prompt模板")
     @GetMapping("/{agentName}")
     public Result<PromptTemplate> getPrompt(@PathVariable String agentName) {
         return Result.success(promptService.getTemplate(agentName));
     }
 
-    /** 热更新Prompt模板（无需重启） */
+    @Operation(summary = "热更新Prompt模板")
     @PutMapping("/{agentName}")
     public Result<PromptTemplate> updatePrompt(
             @PathVariable String agentName,

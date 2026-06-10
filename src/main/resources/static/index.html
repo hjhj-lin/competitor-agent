@@ -511,6 +511,22 @@
         font-size: 16px;
         margin-bottom: 16px;
         color: #555;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .btn-export {
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+      .btn-export:hover {
+        opacity: 0.9;
       }
       .report-content {
         line-height: 1.9;
@@ -1109,7 +1125,17 @@
 
         <!-- 报告 -->
         <div class="report-section" id="reportSection">
-          <h3>分析报告</h3>
+          <h3>
+            <span>分析报告</span>
+            <button
+              class="btn-export"
+              id="exportBtn"
+              onclick="exportPdf()"
+              style="display: none"
+            >
+              导出PDF
+            </button>
+          </h3>
           <div class="report-content" id="reportContent"></div>
         </div>
 
@@ -1180,6 +1206,7 @@
       let token = localStorage.getItem("token");
       let currentSse = null;
       let currentTaskId = null;
+      let currentReportId = null;
 
       // Agent 定义
       const AGENTS = ["collect", "analyze", "report", "review"];
@@ -1534,6 +1561,8 @@
         });
         document.getElementById("reportSection").style.display = "none";
         document.getElementById("errorSection").style.display = "none";
+        document.getElementById("exportBtn").style.display = "none";
+        currentReportId = null;
 
         if (status === "COMPLETED") {
           // 已完成，直接加载报告
@@ -1774,8 +1803,10 @@
               document.getElementById("reportContent").innerHTML =
                 marked.parse(cleaned);
               document.getElementById("reportSection").style.display = "block";
-              // 报告加载完成后隐藏流式内容区
               hideStreamingContent();
+              currentReportId = taskId;
+              document.getElementById("exportBtn").style.display =
+                "inline-block";
             }
           });
       }
@@ -1944,8 +1975,8 @@
           .then((r) => r.json())
           .then((res) => {
             if (res.code === 200 && res.data.content) {
-              // 跳到详情页展示报告
               currentTaskId = null;
+              currentReportId = id;
               showPage("detailPage");
               document.getElementById("detailTitle").textContent =
                 companyName + " - 竞品分析报告";
@@ -1956,8 +1987,40 @@
                 marked.parse(cleaned);
               document.getElementById("reportSection").style.display = "block";
               document.getElementById("errorSection").style.display = "none";
+              document.getElementById("exportBtn").style.display =
+                "inline-block";
             }
           });
+      }
+
+      // ========== 导出PDF ==========
+
+      function exportPdf() {
+        if (!currentReportId) return;
+        const url = currentTaskId
+          ? API + "/api/reports/task/" + currentTaskId + "/export"
+          : API + "/api/reports/" + currentReportId + "/export";
+        fetch(url, { headers: authHeaders() })
+          .then((r) => {
+            if (!r.ok) throw new Error("导出失败");
+            const fileName = r.headers.get("Content-Disposition");
+            return r.blob().then((blob) => ({ blob, fileName }));
+          })
+          .then(({ blob, fileName }) => {
+            let name = "竞品分析报告.pdf";
+            if (fileName) {
+              const match = fileName.match(/filename\*=UTF-8''(.+)/);
+              if (match) name = decodeURIComponent(match[1]);
+            }
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+          })
+          .catch(() => alert("导出失败，请重试"));
       }
 
       // ========== 用户管理 ==========

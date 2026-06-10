@@ -20,9 +20,12 @@ import com.competitor.agent.service.SseEmitterService;
 import com.competitor.agent.vo.AnalysisTaskListVO;
 import com.competitor.agent.vo.AnalysisTaskVO;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@Tag(name = "任务管理", description = "分析任务的创建、查询、删除与SSE推送")
 @RestController
 @RequestMapping("/api/tasks")
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ public class TaskController {
     private final AnalysisTaskService analysisTaskService;
     private final SseEmitterService sseEmitterService;
 
+    @Operation(summary = "创建分析任务")
     @PostMapping
     @RateLimit(permits = 5, message = "创建任务过于频繁，每分钟最多5次")
     public Result<AnalysisTaskVO> createTask(
@@ -42,6 +46,7 @@ public class TaskController {
         return Result.success(vo);
     }
 
+    @Operation(summary = "查询任务列表")
     @GetMapping
     public Result<IPage<AnalysisTaskListVO>> listTasks(
             @RequestAttribute("currentUserId") Long userId,
@@ -54,6 +59,7 @@ public class TaskController {
         return Result.success(page);
     }
 
+    @Operation(summary = "查询任务详情")
     @GetMapping("/{id}")
     public Result<AnalysisTaskVO> getTaskById(
             @RequestAttribute("currentUserId") Long userId,
@@ -62,6 +68,7 @@ public class TaskController {
         return Result.success(vo);
     }
 
+    @Operation(summary = "SSE推送任务进度")
     @GetMapping("/{id}/stream")
     public SseEmitter streamTask(
             @RequestAttribute("currentUserId") Long userId,
@@ -70,6 +77,7 @@ public class TaskController {
         return sseEmitterService.createEmitter(id);
     }
 
+    @Operation(summary = "删除任务")
     @DeleteMapping("/{id}")
     public Result<Void> deleteTask(
             @RequestAttribute("currentUserId") Long userId,

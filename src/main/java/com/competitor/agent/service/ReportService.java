@@ -43,6 +43,16 @@ public class ReportService {
         return toVO(report);
     }
 
+    public ReportVO getReportByTaskId(Long userId, Long taskId) {
+        LambdaQueryWrapper<Report> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Report::getUserId, userId)
+               .eq(Report::getTaskId, taskId)
+               .orderByDesc(Report::getCreatedAt)
+               .last("LIMIT 1");
+        Report report = reportMapper.selectOne(wrapper);
+        return report != null ? toVO(report) : null;
+    }
+
     private ReportVO toVO(Report report) {
         ReportVO vo = new ReportVO();
         vo.setId(report.getId());
