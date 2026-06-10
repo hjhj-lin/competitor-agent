@@ -4,6 +4,8 @@ import java.util.Map;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
 import com.competitor.agent.entity.AgentExecution;
@@ -32,7 +34,12 @@ public abstract class BaseReActAgent implements Agent {
     protected final SseEmitterService sseEmitterService;
     protected final PromptService promptService;
 
-    protected BaseReActAgent(ChatClient chatClient, SearchTools searchTools, ReadReportTool readReportTool,
+    @Autowired(required = false)
+    @Qualifier("kimiChatClient")
+    protected ChatClient kimiChatClient;
+
+    protected BaseReActAgent(ChatClient chatClient,
+                             SearchTools searchTools, ReadReportTool readReportTool,
                              AgentExecutionMapper agentExecutionMapper, SseEmitterService sseEmitterService,
                              PromptService promptService) {
         this.chatClient = chatClient;
@@ -43,12 +50,23 @@ public abstract class BaseReActAgent implements Agent {
         this.promptService = promptService;
     }
 
+    /** 获取当前Agent使用的ChatClient */
+    protected ChatClient getActiveChatClient() {
+        return useKimi() && kimiChatClient != null ? kimiChatClient : chatClient;
+    }
+
+    /** 是否使用Kimi模型，子类可覆盖 */
+    protected boolean useKimi() {
+        return false;
+    }
+
     @Override
     @CircuitBreaker(name = "aiCall", fallbackMethod = "executeFallback")
     public AgentResult execute(AgentContext context) {
         String companyName = context.getCompanyName();
         Long taskId = context.getTaskId();
-        log.info("[Agent开始] agent={} taskId={} company={} model={}", getName(), taskId, companyName, getModelName());
+        log.info("[Agent开始] agent={} taskId={} company={} model={} provider={}",
+                getName(), taskId, companyName, getModelName(), useKimi() ? "kimi" : "deepseek");
         long start = System.currentTimeMillis();
 
         AgentExecution execution = new AgentExecution();
@@ -62,7 +80,7 @@ public abstract class BaseReActAgent implements Agent {
             // 流式调用：逐token推SSE，同时收集完整结果
             StringBuilder resultBuilder = new StringBuilder();
 
-            var promptSpec = chatClient.prompt()
+            var promptSpec = getActiveChatClient().prompt()
                     .system(getSystemPrompt())
                     .user(question)
                     .tools(searchTools, readReportTool);

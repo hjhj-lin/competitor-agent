@@ -22,6 +22,7 @@ public class ReviewAgent extends BaseReActAgent {
     @Override public String getDescription() { return "review - 审核Agent：交叉校验报告，标注置信度"; }
     @Override protected String getResultKey() { return "reviewResult"; }
     @Override protected String getModelName() { return "deepseek-chat"; }
+    // TODO: 配置正确的KIMI_API_KEY后启用 @Override protected boolean useKimi() { return true; }
 
     @Override
     protected String buildQuestion(AgentContext context) {

@@ -20,6 +20,12 @@ spring:
         multiplier: 2
         max-interval: 30s
 
+# Kimi模型配置（OpenAI兼容）
+kimi:
+  api-key: ${KIMI_API_KEY:}
+  base-url: https://api.moonshot.ai
+  model: kimi-k2.6
+
 jwt:
   secret: ${JWT_SECRET:dev-local-jwt-key-competitor-agent}
   expiration: 86400000
